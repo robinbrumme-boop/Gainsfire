@@ -2,8 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Served from GitHub Pages under /gainsfire/. Override with BASE=/ for other hosts.
-const base = process.env.BASE ?? '/gainsfire/';
+// Served from GitHub Pages under /Gainsfire/. Override with BASE=/ for other hosts.
+const base = process.env.BASE ?? '/Gainsfire/';
 
 export default defineConfig({
   base,

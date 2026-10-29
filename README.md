@@ -23,7 +23,7 @@ App-Link öffnen, dann
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/gainsfire/
+npm run dev      # http://localhost:5173/Gainsfire/
 npm run build    # Typecheck + Produktions-Build nach dist/
 ```
 

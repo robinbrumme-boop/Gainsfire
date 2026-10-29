@@ -16,7 +16,7 @@ Strength-training log PWA. UI language is German; code and commits in English.
 
 ## Commands
 - `npm run build` – must pass (runs `tsc --noEmit` first)
-- `npm run dev` / `npm run preview` – served under `/gainsfire/` (set `BASE=/` for other hosts)
+- `npm run dev` / `npm run preview` – served under `/Gainsfire/` (set `BASE=/` for other hosts)
 
 ## Conventions
 - State updates go through `setState(s => ({ ...s, ... }))`; never mutate.
