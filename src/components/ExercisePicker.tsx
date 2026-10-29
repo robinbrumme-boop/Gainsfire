@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
+import { NewExerciseForm } from './NewExerciseForm';
 import { MUSCLES } from '../types';
 
 interface Props {
@@ -13,6 +14,7 @@ export function ExercisePicker({ title = 'Übungen hinzufügen', exclude = [], o
   const exercises = useStore((s) => s.exercises);
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<string[]>([]);
+  const [creating, setCreating] = useState(false);
 
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -34,6 +36,21 @@ export function ExercisePicker({ title = 'Übungen hinzufügen', exclude = [], o
         </div>
         <input className="search" placeholder="Suchen…" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
         <div className="sheet-body">
+          {creating ? (
+            <NewExerciseForm
+              initialName={query}
+              onCancel={() => setCreating(false)}
+              onCreated={(id) => {
+                setCreating(false);
+                setQuery('');
+                setPicked((p) => [...p, id]);
+              }}
+            />
+          ) : (
+            <button className="list-row create-row" onClick={() => setCreating(true)}>
+              + {query.trim() ? `„${query.trim()}“ als eigene Übung erstellen` : 'Eigene Übung erstellen'}
+            </button>
+          )}
           {groups.map((g) => (
             <section key={g.muscle}>
               <h4 className="group-label">{g.muscle}</h4>
@@ -45,7 +62,7 @@ export function ExercisePicker({ title = 'Übungen hinzufügen', exclude = [], o
               ))}
             </section>
           ))}
-          {!groups.length && <p className="muted center">Keine Übung gefunden. Eigene Übungen legst du im Tab „Übungen“ an.</p>}
+          {!groups.length && !creating && <p className="muted center">Keine Übung „{query}“ gefunden.</p>}
         </div>
       </div>
     </div>

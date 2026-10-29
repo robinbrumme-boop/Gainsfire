@@ -1,6 +1,6 @@
-export type Muscle = 'Brust' | 'Rücken' | 'Beine' | 'Schultern' | 'Arme' | 'Bauch';
+export type Muscle = 'Brust' | 'Rücken' | 'Beine' | 'Gesäß' | 'Schultern' | 'Arme' | 'Bauch';
 
-export const MUSCLES: Muscle[] = ['Brust', 'Rücken', 'Beine', 'Schultern', 'Arme', 'Bauch'];
+export const MUSCLES: Muscle[] = ['Brust', 'Rücken', 'Beine', 'Gesäß', 'Schultern', 'Arme', 'Bauch'];
 
 export interface Exercise {
   id: string;

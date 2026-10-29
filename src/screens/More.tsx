@@ -78,7 +78,7 @@ export function More() {
         <p><strong>iPhone:</strong> In Safari auf „Teilen“ tippen → „Zum Home-Bildschirm“.</p>
         <p><strong>Android:</strong> In Chrome auf ⋮ tippen → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.</p>
       </div>
-      <p className="muted small center">FlameLog 0.1 · funktioniert auch offline</p>
+      <p className="muted small center">FlameLog 0.2 · funktioniert auch offline</p>
     </div>
   );
 }

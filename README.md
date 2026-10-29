@@ -10,7 +10,7 @@ Ein schlichtes Trainingstagebuch für Krafttraining – als Web-App, die sich au
 - **Zusammenfassung** nach dem Training: Volumen im Vergleich zum letzten Mal, neue Bestleistungen
 - **Verlauf** aller Workouts mit Details
 - **Statistik**: Verlauf pro Übung (geschätztes 1RM, Max-Gewicht, Volumen), Wochenvergleich, Bestleistungen
-- **Übungskatalog** mit eigenen Übungen
+- **Übungskatalog** mit 87 Übungen; eigene Übungen lassen sich im Tab „Übungen“ oder direkt beim Hinzufügen im Workout anlegen
 - **Backup** als JSON exportieren / importieren – alle Daten bleiben auf dem Gerät
 
 ## Aufs Handy

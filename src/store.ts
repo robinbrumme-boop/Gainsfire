@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
-import { initialState } from './seed';
-import type { State } from './types';
+import { catalogExercises, initialState } from './seed';
+import type { Muscle, State } from './types';
+import { uid } from './util';
 
 const KEY = 'flamelog:v1';
 
@@ -9,12 +10,21 @@ function load(): State {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as State;
-      if (parsed.version === 1) return parsed;
+      if (parsed.version === 1) return withCatalog(parsed);
     }
   } catch {
     // fall through to a fresh state
   }
   return initialState();
+}
+
+/** Adds catalog exercises introduced after the user's data was first saved. */
+function withCatalog(s: State): State {
+  const ids = new Set(s.exercises.map((e) => e.id));
+  const names = new Set(s.exercises.map((e) => e.name.toLowerCase()));
+  // Skip names the user already created as custom exercises.
+  const missing = catalogExercises().filter((e) => !ids.has(e.id) && !names.has(e.name.toLowerCase()));
+  return missing.length ? { ...s, exercises: [...s.exercises, ...missing] } : s;
 }
 
 let state: State = load();
@@ -35,7 +45,17 @@ export function setState(update: (s: State) => State) {
 }
 
 export function replaceState(next: State) {
-  setState(() => next);
+  setState(() => withCatalog(next));
+}
+
+/** Creates a custom exercise. Returns its id, or an error message for the user. */
+export function addCustomExercise(name: string, muscle: Muscle): { id: string } | { error: string } {
+  const n = name.trim();
+  if (!n) return { error: 'Bitte einen Namen eingeben.' };
+  if (state.exercises.some((e) => e.name.toLowerCase() === n.toLowerCase())) return { error: 'Diese Übung gibt es schon.' };
+  const id = uid();
+  setState((s) => ({ ...s, exercises: [...s.exercises, { id, name: n, muscle, custom: true }] }));
+  return { id };
 }
 
 function subscribe(l: () => void) {
