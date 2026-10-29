@@ -175,3 +175,28 @@ input[type='number'] { -moz-appearance: textfield; }
 .sheet .form { margin-top: 4px; }
 .list-row.flash { animation: flash 1.6s ease-out; }
 @keyframes flash { from { background: color-mix(in srgb, var(--accent) 35%, transparent); } }
+
+.week .row { margin-bottom: 10px; }
+.week-dots { display: flex; gap: 6px; margin-bottom: 8px; }
+.week-dots span { flex: 1; height: 8px; border-radius: 99px; background: var(--surface-2); }
+.week-dots span.on { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.btn.next-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.next-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }
+.next-sub { font-size: 13px; font-weight: 500; opacity: 0.8; }
+.target { margin-left: 8px; font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); font-weight: 600; }
+.target.met { background: color-mix(in srgb, var(--good) 25%, transparent); color: var(--good); }
+.select.variant { margin-bottom: 8px; padding: 8px 10px; font-size: 14px; }
+.variant-name { margin: -4px 0 8px; }
+.slot .row { gap: 4px; }
+.slot .num { width: 22px; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+.slot-label { background: transparent !important; border: 0 !important; border-bottom: 1px dashed var(--line) !important; border-radius: 0 !important; padding: 6px 2px !important; font-weight: 600; }
+.slot-sets { justify-content: flex-start !important; gap: 10px !important; margin: 10px 0; }
+.stepper { display: inline-flex; align-items: center; background: var(--surface-2); border-radius: 10px; }
+.stepper button { width: 34px; height: 32px; font-size: 18px; color: var(--accent); }
+.stepper span { min-width: 22px; text-align: center; font-weight: 700; }
+.chip { display: inline-flex; align-items: center; gap: 4px; }
+.chip-x { font-size: 11px; color: var(--muted); padding-left: 2px; }
+.chip.add { color: var(--accent); border-style: dashed; }
+.toggle-row { padding: 8px 0; font-size: 14px; }
+.toggle-row input { width: 22px; height: 22px; accent-color: var(--accent); }
+.more-row { margin-top: 12px; }

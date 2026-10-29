@@ -4,7 +4,8 @@ Ein schlichtes Trainingstagebuch für Krafttraining – als Web-App, die sich au
 
 ## Funktionen
 
-- **Routinen** anlegen (Push / Pull / Beine sind vorbereitet) und mit einem Tipp starten
+- **Wochenplan**: Push FB und Pull FB im Wechsel, 6× pro Woche – die App schlägt das nächste Training vor und zeigt den Wochenfortschritt
+- **Routinen** mit Satzvorgaben pro Übung (auch Bereiche wie 2–3 Sätze) und Varianten, zwischen denen man im Training wechseln kann
 - **Workout loggen**: Gewicht × Wiederholungen pro Satz, abhaken mit ✓ – die Werte vom letzten Mal sind schon eingetragen
 - **Pausentimer** startet automatisch nach jedem Satz (einstellbar, +15 s, überspringen)
 - **Zusammenfassung** nach dem Training: Volumen im Vergleich zum letzten Mal, neue Bestleistungen

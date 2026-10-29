@@ -18,7 +18,10 @@ export function Exercises() {
     setState((s) => ({
       ...s,
       exercises: s.exercises.filter((e) => e.id !== id),
-      routines: s.routines.map((r) => ({ ...r, exerciseIds: r.exerciseIds.filter((x) => x !== id) })),
+      routines: s.routines.map((r) => ({
+        ...r,
+        items: r.items.map((it) => ({ ...it, options: it.options.filter((x) => x !== id) })).filter((it) => it.options.length),
+      })),
     }));
   };
 

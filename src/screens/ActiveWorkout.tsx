@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ExercisePicker } from '../components/ExercisePicker';
 import { getState, setState, useStore } from '../store';
 import type { SetEntry, Workout } from '../types';
-import { doneSets, e1rm, fmtClock, fmtKg, fmtVolume, pctChange, previousSets, volume } from '../util';
+import { doneSets, e1rm, fmtClock, fmtKg, fmtVolume, pctChange, prefillSets, previousSets, volume } from '../util';
 
 export interface Summary {
   workout: Workout;
@@ -51,6 +51,17 @@ export function ActiveWorkout({ onRest, onFinished }: Props) {
     update((w) => ({
       ...w,
       exercises: w.exercises.map((e, i) => (i !== ei ? e : { ...e, sets: e.sets.filter((_, j) => j !== si) })),
+    }));
+
+  const switchVariant = (ei: number, exerciseId: string) =>
+    update((w) => ({
+      ...w,
+      exercises: w.exercises.map((e, i) => {
+        if (i !== ei) return e;
+        // Keep finished sets; refill the open ones with the new exercise's last values.
+        const fresh = prefillSets(getState().workouts, exerciseId, e.sets.length);
+        return { ...e, exerciseId, sets: e.sets.map((st, j) => (st.done ? st : fresh[j])) };
+      }),
     }));
 
   const removeExercise = (ei: number) => update((w) => ({ ...w, exercises: w.exercises.filter((_, i) => i !== ei) }));
@@ -108,9 +119,25 @@ export function ActiveWorkout({ onRest, onFinished }: Props) {
         return (
           <div key={`${e.exerciseId}-${ei}`} className="card exercise">
             <div className="exercise-head">
-              <strong>{ex?.name ?? 'Übung'}</strong>
+              <div className="grow">
+                <strong>{e.label || ex?.name || 'Übung'}</strong>
+                {e.target && (
+                  <span className={`target ${e.sets.filter((x) => x.done).length >= Number(e.target.split('–')[0]) ? 'met' : ''}`}>
+                    {e.sets.filter((x) => x.done).length}/{e.target} Sätze
+                  </span>
+                )}
+              </div>
               <button className="icon-btn danger" aria-label="Übung entfernen" onClick={() => removeExercise(ei)}>✕</button>
             </div>
+            {e.options && e.options.length > 1 ? (
+              <select className="select variant" value={e.exerciseId} onChange={(ev) => switchVariant(ei, ev.target.value)} aria-label="Variante">
+                {e.options.map((id) => (
+                  <option key={id} value={id}>{exercises.find((x) => x.id === id)?.name ?? 'Gelöschte Übung'}</option>
+                ))}
+              </select>
+            ) : (
+              e.label && ex && <div className="muted small variant-name">{ex.name}</div>
+            )}
             <div className="set-grid head">
               <span>Satz</span>
               <span>Letztes Mal</span>
@@ -152,15 +179,7 @@ export function ActiveWorkout({ onRest, onFinished }: Props) {
               ...w,
               exercises: [
                 ...w.exercises,
-                ...ids.map((exerciseId) => {
-                  const p = previousSets(s.workouts, exerciseId);
-                  return {
-                    exerciseId,
-                    sets: p?.length
-                      ? p.map((x) => ({ weight: x.weight, reps: x.reps, done: false }))
-                      : [0, 1, 2].map(() => ({ weight: 0, reps: 0, done: false })),
-                  };
-                }),
+                ...ids.map((exerciseId) => ({ exerciseId, sets: prefillSets(s.workouts, exerciseId) })),
               ],
             }));
             setPicking(false);

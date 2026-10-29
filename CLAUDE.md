@@ -9,8 +9,8 @@ Strength-training log PWA. UI language is German; code and commits in English.
 - No router: tabs are switched in `src/App.tsx`
 
 ## Layout
-- `src/types.ts` – data model (`State` with `version: 1`; bump + migrate in `load()` when changing shape)
-- `src/seed.ts` – exercise catalog, default routines, demo data
+- `src/types.ts` – data model (`State` with `version: 2`; bump + extend `migrate()` in `src/store.ts` when changing shape)
+- `src/seed.ts` – exercise catalog (append only: ids come from position), the Push FB / Pull FB plan, demo data
 - `src/util.ts` – formatting and stats helpers (e1RM via Epley)
 - `src/screens/*` – one file per tab; `src/components/*` – shared UI
 

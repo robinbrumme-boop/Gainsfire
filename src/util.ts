@@ -70,3 +70,34 @@ export function pctChange(now: number, before: number) {
   if (!before) return undefined;
   return ((now - before) / before) * 100;
 }
+
+/** Monday 00:00 of the week containing ts. */
+export function weekStart(ts: number) {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d.getTime();
+}
+
+export function setRange(sets: number, setsMax?: number) {
+  return setsMax && setsMax > sets ? `${sets}–${setsMax}` : `${sets}`;
+}
+
+/** Undone sets pre-filled with last time's values for this exercise (count defaults to last time's). */
+export function prefillSets(workouts: Workout[], exerciseId: string, count?: number): SetEntry[] {
+  const prev = previousSets(workouts, exerciseId) ?? [];
+  const n = count ?? (prev.length || 3);
+  return Array.from({ length: n }, (_, i) => {
+    const p = prev[i] ?? prev[prev.length - 1];
+    return { weight: p?.weight ?? 0, reps: p?.reps ?? 0, done: false };
+  });
+}
+
+/** Of a slot's alternatives, the one trained most recently (else the default). */
+export function preferredOption(workouts: Workout[], options: string[]): string {
+  for (const w of workouts) {
+    const hit = w.exercises.find((e) => options.includes(e.exerciseId));
+    if (hit) return hit.exerciseId;
+  }
+  return options[0];
+}

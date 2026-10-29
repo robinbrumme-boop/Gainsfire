@@ -1,4 +1,4 @@
-import type { Exercise, Muscle, Routine, State, Workout } from './types';
+import type { Exercise, Muscle, Plan, Routine, RoutineItem, State, Workout } from './types';
 import { uid } from './util';
 
 const CATALOG: [string, Muscle][] = [
@@ -91,6 +91,7 @@ const CATALOG: [string, Muscle][] = [
   ['Woodchopper am Kabel', 'Bauch'],
   ['Seitstütz', 'Bauch'],
   ['Bauchmaschine', 'Bauch'],
+  ['Unterarm-Extension (Handgelenk)', 'Arme'],
 ];
 
 /** The built-in catalog with stable ids (`ex1`, `ex2`, …). */
@@ -98,45 +99,76 @@ export function catalogExercises(): Exercise[] {
   return CATALOG.map(([name, muscle], i) => ({ id: `ex${i + 1}`, name, muscle }));
 }
 
-export function initialState(): State {
-  const exercises = catalogExercises();
-  const byName = (n: string) => exercises.find((e) => e.name === n)!.id;
-  const routines: Routine[] = [
-    {
-      id: uid(),
-      name: 'Push',
-      exerciseIds: ['Bankdrücken', 'Schulterdrücken', 'Schrägbankdrücken (Kurzhantel)', 'Seitheben', 'Trizepsdrücken am Kabel'].map(byName),
-    },
-    {
-      id: uid(),
-      name: 'Pull',
-      exerciseIds: ['Klimmzüge', 'Langhantelrudern', 'Latzug', 'Face Pulls', 'Bizepscurls (Langhantel)'].map(byName),
-    },
-    {
-      id: uid(),
-      name: 'Beine',
-      exerciseIds: ['Kniebeugen', 'Rumänisches Kreuzheben', 'Beinpresse', 'Beinbeuger', 'Wadenheben'].map(byName),
-    },
-  ];
-  return { version: 1, exercises, routines, workouts: [], settings: { restSeconds: 90 } };
+type Slot = [sets: number | [number, number], options: string[], label?: string];
+
+const PUSH_FB: Slot[] = [
+  [3, ['Seitheben', 'Seitheben am Kabel', 'Kurzhantel-Schulterdrücken']],
+  [2, ['Bankdrücken', 'Kurzhantel-Bankdrücken', 'Schrägbankdrücken (Kurzhantel)', 'Schrägbankdrücken (Langhantel)', 'Brustpresse an der Maschine', 'Dips'], 'Brust drückend'],
+  [2, ['Butterfly an der Maschine', 'Butterfly am Kabel', 'Cable Crossover', 'Kurzhantel-Fliegende'], 'Brust Fly'],
+  [2, ['Trizepsdrücken am Kabel', 'Trizepsdrücken mit Seil', 'Trizepsdrücken über Kopf', 'French Press', 'Enges Bankdrücken'], 'Trizeps'],
+  [2, ['Beinpresse', 'Hackenschmidt-Kniebeugen', 'Kniebeugen', 'Goblet Squats'], 'Beinpresse'],
+  [2, ['Beinstrecker'], 'Beinstrecken'],
+  [[2, 3], ['Crunches am Kabel', 'Bauchmaschine', 'Beinheben hängend', 'Ab Roller', 'Crunches'], 'Bauch'],
+];
+
+const PULL_FB: Slot[] = [
+  [2, ['Latzug eng', 'Kabelrudern sitzend', 'Klimmzüge (Untergriff)'], 'Zug eng'],
+  [2, ['Latzug', 'Klimmzüge', 'Rudern an der Maschine'], 'Zug breit'],
+  [3, ['Reverse Butterfly', 'Face Pulls', 'T-Bar-Rudern', 'Rudern an der Maschine'], 'Mittlerer Trapez'],
+  [2, ['Bizepscurls (Kurzhantel)', 'SZ-Curls', 'Bizepscurls am Kabel', 'Scottcurls', 'Hammercurls'], 'Bizeps'],
+  [2, ['Unterarm-Extension (Handgelenk)', 'Reverse Curls'], 'Unterarm Extension'],
+  [2, ['Unterarmcurls'], 'Unterarm Flexion'],
+  [3, ['Beinbeuger', 'Beinbeuger sitzend'], 'Beinbeugen'],
+];
+
+/** The user's own Push/Pull full-body split, trained 3× each per week. */
+export function fbRoutines(exercises: Exercise[]): { routines: Routine[]; plan: Plan } {
+  const idOf = (n: string) => exercises.find((e) => e.name.toLowerCase() === n.toLowerCase())?.id;
+  const build = (name: string, slots: Slot[]): Routine => ({
+    id: uid(),
+    name,
+    items: slots
+      .map(([sets, names, label]): RoutineItem => ({
+        id: uid(),
+        label,
+        options: names.map(idOf).filter((x): x is string => !!x),
+        sets: Array.isArray(sets) ? sets[0] : sets,
+        setsMax: Array.isArray(sets) ? sets[1] : undefined,
+      }))
+      .filter((it) => it.options.length),
+  });
+  const push = build('Push FB', PUSH_FB);
+  const pull = build('Pull FB', PULL_FB);
+  return { routines: [push, pull], plan: { routineIds: [push.id, pull.id], perWeek: 6 } };
 }
 
-/** Eight weeks of push/pull/legs with steady progression, so stats have something to show. */
+export function initialState(): State {
+  const exercises = catalogExercises();
+  const { routines, plan } = fbRoutines(exercises);
+  return { version: 2, exercises, routines, workouts: [], settings: { restSeconds: 90 }, plan };
+}
+
+/** Eight weeks of the weekly plan with steady progression, so stats have something to show. */
 export function demoWorkouts(state: State): Workout[] {
   const start: Record<string, number> = {
-    Bankdrücken: 60, Schulterdrücken: 35, 'Schrägbankdrücken (Kurzhantel)': 20, Seitheben: 8,
-    'Trizepsdrücken am Kabel': 20, Klimmzüge: 0, Langhantelrudern: 50, Latzug: 45, 'Face Pulls': 15,
-    'Bizepscurls (Langhantel)': 25, Kniebeugen: 70, 'Rumänisches Kreuzheben': 60, Beinpresse: 120,
-    Beinbeuger: 35, Wadenheben: 60,
+    Seitheben: 8, Bankdrücken: 60, 'Butterfly an der Maschine': 40, 'Trizepsdrücken am Kabel': 20,
+    Beinpresse: 120, Beinstrecker: 40, 'Crunches am Kabel': 30, 'Latzug eng': 50, Latzug: 45,
+    'Reverse Butterfly': 30, 'Bizepscurls (Kurzhantel)': 12, 'Unterarm-Extension (Handgelenk)': 10,
+    Unterarmcurls: 14, Beinbeuger: 35,
   };
   const name = (id: string) => state.exercises.find((e) => e.id === id)?.name ?? '';
   const out: Workout[] = [];
   const day = 86_400_000;
   const now = Date.now();
   let session = 0;
+  const plan = state.plan.routineIds.map((id) => state.routines.find((r) => r.id === id)).filter((r) => !!r);
+  const rotation = plan.length ? plan : state.routines.slice(0, 2);
+  if (!rotation.length) return [];
+  const perWeek = Math.min(7, Math.max(1, state.plan.perWeek));
   for (let week = 7; week >= 0; week--) {
-    for (const [d, routine] of state.routines.slice(0, 3).entries()) {
-      const startedAt = now - (week * 7 + (6 - d * 2)) * day - 18 * 3_600_000;
+    for (let d = 0; d < perWeek; d++) {
+      const routine = rotation[session % rotation.length];
+      const startedAt = now - (week * 7 + (7 - d)) * day - 18 * 3_600_000;
       if (startedAt > now) continue;
       const progress = 7 - week;
       out.push({
@@ -145,11 +177,13 @@ export function demoWorkouts(state: State): Workout[] {
         routineId: routine.id,
         startedAt,
         finishedAt: startedAt + (55 + ((session * 7) % 20)) * 60_000,
-        exercises: routine.exerciseIds.map((exId) => {
+        exercises: routine.items.map((it) => {
+          const exId = it.options[0];
           const base = start[name(exId)] ?? 20;
-          const weight = base === 0 ? 0 : Math.round((base * (1 + progress * 0.025)) / 2.5) * 2.5;
-          const reps = base === 0 ? 6 + Math.floor(progress / 2) : 8 + (progress % 3);
-          return { exerciseId: exId, sets: [0, 1, 2].map((s) => ({ weight, reps: Math.max(5, reps - s), done: true })) };
+          const weight = Math.round((base * (1 + progress * 0.025)) / 2.5) * 2.5;
+          const reps = 8 + (progress % 3);
+          const sets = Array.from({ length: it.sets }, (_, s) => ({ weight, reps: Math.max(5, reps - s), done: true }));
+          return { exerciseId: exId, label: it.label, options: it.options, sets };
         }),
       });
       session++;

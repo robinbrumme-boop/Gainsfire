@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { demoWorkouts, initialState } from '../seed';
-import { getState, isValidState, replaceState, setState, useStore } from '../store';
+import { getState, migrate, replaceState, setState, useStore } from '../store';
 
 export function loadDemo() {
   const s = getState();
@@ -10,6 +10,7 @@ export function loadDemo() {
 
 export function More() {
   const rest = useStore((s) => s.settings.restSeconds);
+  const perWeek = useStore((s) => s.plan.perWeek);
   const count = useStore((s) => s.workouts.length);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -24,8 +25,8 @@ export function More() {
 
   const importData = async (file: File) => {
     try {
-      const data = JSON.parse(await file.text());
-      if (!isValidState(data)) throw new Error('invalid');
+      const data = migrate(JSON.parse(await file.text()));
+      if (!data) throw new Error('invalid');
       if (confirm(`Backup mit ${data.workouts.length} Workouts laden? Aktuelle Daten werden ersetzt.`)) replaceState(data);
     } catch {
       alert('Die Datei ist kein gültiges FlameLog-Backup.');
@@ -50,6 +51,17 @@ export function More() {
             ))}
           </select>
         </label>
+        <label className="row more-row">
+          <span>Trainings pro Woche</span>
+          <select
+            className="select inline"
+            value={perWeek}
+            onChange={(e) => setState((s) => ({ ...s, plan: { ...s.plan, perWeek: Number(e.target.value) } }))}
+          >
+            {[1, 2, 3, 4, 5, 6, 7].map((n) => <option key={n} value={n}>{n}×</option>)}
+          </select>
+        </label>
+        <p className="muted small">Welche Routinen im Wochenplan abwechseln, stellst du in der jeweiligen Routine ein.</p>
       </div>
 
       <h4 className="group-label">Daten ({count} Workouts, nur auf diesem Gerät gespeichert)</h4>
@@ -78,7 +90,7 @@ export function More() {
         <p><strong>iPhone:</strong> In Safari auf „Teilen“ tippen → „Zum Home-Bildschirm“.</p>
         <p><strong>Android:</strong> In Chrome auf ⋮ tippen → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.</p>
       </div>
-      <p className="muted small center">FlameLog 0.2 · funktioniert auch offline</p>
+      <p className="muted small center">FlameLog 0.3 · funktioniert auch offline</p>
     </div>
   );
 }
